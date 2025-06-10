@@ -1,0 +1,29 @@
+
+
+CREATE SERVER AUDIT [AuditToCentralServer]
+TO FILE (
+    FILEPATH = 'C:\backup\audit', 
+    MAXSIZE = 10 MB, 
+    MAX_ROLLOVER_FILES = 10,
+    RESERVE_DISK_SPACE = OFF
+)
+
+
+============================
+
+
+
+CREATE SERVER AUDIT SPECIFICATION [AuditLogins]
+FOR SERVER AUDIT [AuditToCentralServer]
+ADD (SUCCESSFUL_LOGIN_GROUP),
+ADD (FAILED_LOGIN_GROUP)
+WITH (STATE = ON);
+
+
+
+SELECT *
+FROM fn_get_audit_file('C:\backup\audit\Audit*.sqlaudit', DEFAULT, DEFAULT);
+
+
+
+

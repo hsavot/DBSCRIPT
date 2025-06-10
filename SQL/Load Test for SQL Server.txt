@@ -1,0 +1,162 @@
+
+
+
+
+
+CREATE TABLE dbo.BigDataTest (
+       ID INT IDENTITY(1,1) PRIMARY KEY,
+       Filler1 CHAR(3000) DEFAULT REPLICATE('A', 3000),
+    Filler2 CHAR(3000) DEFAULT REPLICATE('B', 3000),
+    Filler3 CHAR(2000) DEFAULT REPLICATE('C', 2000)
+);
+
+
+
+create table dbo.load_test_time(load_type varchar(20),start_Time datetime,end_time datetime)
+
+
+
+
+Total: 4000 + 4000 + 2000 = 10,000 bytes per row ≈ 10 KB
+
+
+DECLARE @i INT = 0;
+
+WHILE @i < 1000000
+BEGIN
+    INSERT INTO dbo.BigDataTest DEFAULT VALUES;
+    SET @i = @i + 1;
+    
+    -- Optional: Print progress every 10,000 rows
+    IF @i % 10000 = 0
+        PRINT CAST(@i AS VARCHAR) + ' rows inserted...';
+END
+
+
+=== start time = 9.14   = 3.40 time
+
+
+####
+
+EXEC sp_spaceused 'dbo.BigDataTest';
+
+
+
+
+#### Bulk Load Testing
+
+INSERT INTO dbo.BigDataTestbulkcopy DEFAULT VALUES;
+GO 1000000
+
+
+
+CREATE TABLE dbo.BigDataTest_bulkcopy (
+       ID INT IDENTITY(1,1) PRIMARY KEY,
+       Filler1 CHAR(3000) DEFAULT REPLICATE('A', 3000),
+    Filler2 CHAR(3000) DEFAULT REPLICATE('B', 3000),
+    Filler3 CHAR(2000) DEFAULT REPLICATE('C', 2000)
+);
+
+============================
+
+
+create table dbo.load_test_time(load_type varchar(20),start_Time datetime,end_time datetime)
+
+
+DECLARE 
+    @a DATETIME = GETDATE(),
+    @b DATETIME;
+
+BEGIN
+    PRINT 'Current Date is before start: ' + CAST(@a AS VARCHAR);
+
+	test_proc_load_test
+        -- Simulate some logic, then get end time
+    SET @b = GETDATE();
+
+    PRINT 'Current Date is after completed: ' + CAST(@b AS VARCHAR);
+
+    -- Insert data into table
+    INSERT INTO dbo.load_test_time (load_type, start_time, end_time)
+    VALUES ('USING PROCEDURE', @a, @b);
+END;
+
+===========
+
+DECLARE 
+    @a DATETIME = GETDATE(),
+    @b DATETIME;
+
+BEGIN
+    PRINT 'Current Date is before start: ' + CAST(@a AS VARCHAR);
+
+EXEC	test_proc_load_test
+        -- Simulate some logic, then get end time
+    SET @b = GETDATE();
+
+    PRINT 'Current Date is after completed: ' + CAST(@b AS VARCHAR);
+
+    -- Insert data into table
+    INSERT INTO dbo.load_test_time (load_type, start_time, end_time)
+    VALUES ('USING PROCEDURE', @a, @b);
+END;
+
+
+CREATE PROCEDURE test_proc_load_test
+    @i INT = 0
+AS
+BEGIN
+    WHILE @i < 100000
+    BEGIN
+        INSERT INTO dbo.BigDataTest DEFAULT VALUES;
+        SET @i = @i + 1;
+    END;
+END;
+
+CREATE PROCEDURE test_proc_load_test_1m
+    @i INT = 0
+AS
+BEGIN
+    WHILE @i < 1000000
+    BEGIN
+        INSERT INTO dbo.BigDataTest DEFAULT VALUES;
+        SET @i = @i + 1;
+    END;
+END;
+
+
+test_proc_load_test_500k
+
+SELECT DATEDIFF(MINUTE, Start_time, End_time) AS MinutesDifference from dbo.load_test_time
+
+
+EXEC sp_spaceused 'dbo.BigDataTest';
+
+
+truncate table BigDataTest
+
+SELECT
+s.Name AS SchemaName,
+t.Name AS TableName,
+p.rows AS RowCounts,
+CAST(ROUND((SUM(a.used_pages) / 128.00), 2) AS NUMERIC(36, 2)) AS Used_MB,
+CAST(ROUND((SUM(a.total_pages) - SUM(a.used_pages)) / 128.00, 2) AS NUMERIC(36, 2)) AS Unused_MB,
+CAST(ROUND((SUM(a.total_pages) / 128.00), 2) AS NUMERIC(36, 2)) AS Total_MB
+FROM sys.tables t
+INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id
+INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+INNER JOIN sys.allocation_units a ON p.partition_id = a.container_id
+INNER JOIN sys.schemas s ON t.schema_id = s.schema_id
+GROUP BY t.Name, s.Name, p.Rows
+ORDER BY s.Name, t.Name
+GO
+
+select * from dbo.load_test_time order by 2
+
+alter table dbo.load_test_time add time_in_minute int
+
+
+update 
+
+SELECT DATEDIFF(MINUTE, Start_time, End_time) AS MinutesDifference from dbo.load_test_time
+

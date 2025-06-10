@@ -1,0 +1,10 @@
+
+
+#### How to check Heap table
+
+
+SELECT OBJECT_NAME(object_id)
+FROM sys.indexes
+WHERE type = 0
+
+
