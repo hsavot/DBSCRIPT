@@ -1,0 +1,21 @@
+WITH objs AS
+(
+    SELECT type_desc AS Object_Type,
+    COUNT(*) AS Object_Count, 1 AS JoinColumn
+    FROM sys.objects
+    --exclude internal tables, service queues, and system tables
+    WHERE TYPE NOT IN ('IT', 'S', 'SQ')
+    GROUP BY type_desc
+),
+tots AS
+(
+    SELECT COUNT(*) AS Type_Count, 1 AS JoinColumn
+    FROM sys.objects
+    WHERE TYPE NOT IN ('IT', 'S', 'SQ')
+)
+SELECT Object_Type, Object_Count, Type_Count,
+    CAST((Object_Count * 1.0) / Type_Count * 100 AS INT) AS Type_Pct
+FROM objs o
+JOIN tots s
+    ON o.JoinColumn = s.JoinColumn
+ORDER BY Object_Type;

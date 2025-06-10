@@ -1,0 +1,12 @@
+
+
+
+
+#### Login in Instance 
+select name,dbname,createdate from sys.syslogins
+
+
+#### Users 
+select name, createdate from sys.sysusers
+
+

@@ -1,0 +1,34 @@
+
+
+
+
+#### How to export Data-tier application
+#### Working example SQLPackage 
+
+
+
+#How to create BACPAC file ( Logical Backup ) using CLI
+
+Run Below Command on SQL Server Host or Client , For Each Database create new BACPAC file. ( /TargetFile )
+
+Make sure SqlPackage.exe available on Host. if not please download from Microsoft ( https://aka.ms/sqlpackage-windows)
+
+
+ (
+SqlPackage.exe /Action:Export /TargetFile:C:\backup\backup_1.bacpac   /SourceUser:sa /SourcePassword:Hars1203@  /SourceDatabaseName:testdb /SourceServerName:AAD-1V4LJM3 /SourceEncryptConnection:False
+
+
+
+
+
+#### For Loop with Automation
+
+for ($i = 0; $i -lt 5; $i++) {
+    Write-Output "Iteration: $i"
+}
+
+
+$serverName = "localhost"
+$query = "SELECT name FROM sys.databases"
+
+Invoke-Sqlcmd -ServerInstance $serverName -Query $query

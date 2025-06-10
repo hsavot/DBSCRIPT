@@ -1,0 +1,35 @@
+SELECT
+qsrsi.start_time,
+qsrsi.end_time,
+qsq.query_id,
+qsq.query_text_id,
+qsp.plan_id,
+qsq.last_execution_time,
+count_executions,
+qsq.count_compiles,
+avg_duration/1000 as [Avg_Duration(ms)],
+min_duration/1000 as [Min_Duration(ms)],
+max_duration/1000 as [Max_Duration(ms)],
+avg_logical_io_reads,
+min_logical_io_reads,
+max_logical_io_reads,
+avg_physical_io_reads,,
+min_physical_io_reads,
+max_physical_io_reads,
+avg_rowcount,
+min_rowcount,
+max_rowcount,
+avg_num_physical_io_reads,
+min_num_physical_io_reads,
+max_num_physical_io_reads,
+qsqt.query_sql_text,
+query_plan,
+qsq.query_hash
+from sys.query_store_query qsq
+INNER JOIN sys.query_store_query_text qsqt ON qsq.query_text_id = qsqt.query_text_id
+INNER JOIN sys.query_context_settings qcs ON qsq.context_settings_id = qcs.context_settings_id
+INNER JOIN sys.query_store_plan qsp ON qsq.query_id = qsp.query_id
+INNER JOIN sys.query_store_runtime_stats qsrs ON qsrs.plan_id = qsp.plan_id
+INNER JOIN sys.query_store_runtime_stats_interval qsrsi ON qsrs.runtime_stats_interval_id = qsrsi.runtime_stats_interval_id
+WHERE qsrsi.start_time >= @starttime and qsrsi.start_time <= @endtime
+ORDER BY qsrsi.start_time
